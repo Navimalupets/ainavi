@@ -194,16 +194,70 @@ function startSuggestionBar() {
 // ============================================
 sendBtn.disabled = true;
 
-async function loadKnowledgeBase() {
-  try {
-    const response = await fetch("/data.json");
-    knowledgeBase = await response.json() || {};
-    sendBtn.disabled = false;
-    startSuggestionBar();
-  } catch (error) {
-    console.error("Error loading data:", error);
-    alert("Error loading data.");
+// ============================================
+// VERCEL SERVERLESS FUNCTION — /api/data
+// ============================================
+
+const knowledgeBase = {
+  "greet": {
+    "hi": "Hi Magandang araw sayo. Nandito ka ngayon sa website na gawa ni Navi...",
+    "hello": "Hello Magandang araw sayo...",
+    "yo": "Yo mah g! magandang araw sayo man...",
+    "yow": "Yow mah g! magandang araw sayo man..."
+  },
+  "name": {
+    "nickname": "Navi",
+    "first": "Cristopher Ivan",
+    "middle": "Licayan",
+    "last": "Gavarra"
+  },
+  "aboutme": "Hi si Navi ang gumawa nitong website...",
+  "zodiac": "Aquarius",
+  "age": 23,
+  "height": "5'3",
+  "nationality": "Filipino",
+  "student": true,
+  "bday": "January 22",
+  "born": "January 22 2003",
+  "placeofbirth": "Valenzuela",
+  "currenthome": "Pook United, Loma De Gato, Marilao, Bulacan",
+  "school": {
+    "elementary": "Loma De Gato Elementary School",
+    "highschool": "Prenza National High School",
+    "seniorHigh": {
+      "school": "Prenza National High School",
+      "strand": "GAS (General Academic Strand)"
+    },
+    "college": "PDM/Pambayang Dalubhasaan ng Marilao",
+    "course": "Computer Science"
+  },
+  // ILAGAY MO LAHAT NG DATA MO DITO (galing sa original data.js mo)
+  // ... dahil mahaba, i-copy-paste mo na lang lahat
+};
+
+export default function handler(req, res) {
+  // CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "x-api-key, Content-Type");
+
+  // Handle preflight OPTIONS request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
+
+  // Only allow GET
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  // API Key check
+  const apiKey = req.headers["x-api-key"];
+  if (apiKey !== "MY_SECRET_KEY") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  return res.status(200).json(knowledgeBase);
 }
 
 loadKnowledgeBase();
