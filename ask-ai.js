@@ -195,17 +195,23 @@ function startSuggestionBar() {
 sendBtn.disabled = true;
 
 async function loadKnowledgeBase() {
-  try {
-    const response = await fetch("/api/data", {
-      headers: { "x-api-key": "MY_SECRET_KEY" }
-    });
-    knowledgeBase = await response.json() || {};
-    sendBtn.disabled = false;
-    startSuggestionBar();
-  } catch (error) {
-    console.error("Error loading data from backend:", error);
-    alert("Error loading data from backend.");
-  }
+  // Direktang ilagay ang data dito (galing sa iyong data.js)
+  knowledgeBase = {
+    "greet": {
+      "hi": "Hi Magandang araw sayo...",
+      "hello": "Hello Magandang araw sayo..."
+    },
+    "name": {
+      "nickname": "Navi",
+      "first": "Cristopher Ivan",
+      "middle": "Licayan",
+      "last": "Gavarra"
+    }
+    // ... ilagay mo lahat ng data mula sa data.js mo dito
+  };
+  
+  sendBtn.disabled = false;
+  startSuggestionBar();
 }
 
 loadKnowledgeBase();
