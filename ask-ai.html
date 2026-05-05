@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!-- Sinasabi nito sa browser na HTML5 ang ginagamit natin -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Tinitiyak na tama ang laki ng page sa mobile — hindi mag-zoom out -->
+    <!-- maximum-scale=1.0 at user-scalable=no = hindi mag-zoom ang iOS kapag nag-tap sa input -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ask with AI — Navi</title>
+    <!-- Kinukuha ang CSS file para sa styling ng page na ito -->
+    <link rel="stylesheet" href="ask-ai.css">
+    <!-- Kinukuha ang pixel font mula sa Google Fonts para sa retro look -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- BACKGROUND LAYER
+       Hiwalay na div ang background GIF para hindi mag-flash
+       kapag may nag-a-animate sa page. Ang trick ay ang
+       background ay nasa sariling GPU layer (nasa CSS ang explanation) -->
+  <div class="bg-layer"></div>
+
+  <!-- SCANLINES OVERLAY
+       Nagdadagdag ng CRT monitor effect — parang lumang TV.
+       Gawa ito sa repeating gradient na may manipis na itim na linya.
+       pointer-events: none = hindi nito nahaharang ang mga click ng user -->
+  <div class="scanlines"></div>
+
+  <!-- HEADER / NAVIGATION BAR -->
+  <header>
+    <nav class="navbar">
+      <!-- Logo na naka-link sa homepage -->
+      <a href="index.html" class="logo">
+        <!-- Magenta bracket para sa retro styling -->
+        <span class="logo-bracket">[</span>Navi<span class="logo-bracket">]</span>
+      </a>
+      <!-- Navigation links -->
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Message</a></li>
+        <li><a href="#">Projects</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN CHAT SECTION
+       Ito ang buong chat window — titlebar + messages + input -->
+  <section class="ai-conversation">
+
+    <!-- CHAT TITLE BAR
+         Parang window ng computer — may colored dots at label sa taas -->
+    <div class="chat-titlebar">
+      <!-- Tatlong kulay na dots sa kaliwang sulok (parang Mac window) -->
+      <div class="titlebar-dots">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+      </div>
+      <!-- Label sa gitna ng title bar -->
+      <span class="titlebar-label">✦ NAVI AI — ASK ME ANYTHING</span>
+      <!-- Status indicator sa kanang sulok — blinking green dot + "ONLINE" text -->
+      <div class="titlebar-status">
+        <span class="status-dot"></span>
+        <span class="status-text">ONLINE</span>
+      </div>
+    </div>
+
+    <!-- MESSAGES CONTAINER
+         Dito lalabas ang lahat ng mensahe ng user at ng AI.
+         Ang JS ang mag-aadad ng mga message dito dynamically. -->
+    <div class="messages" id="messages"></div>
+
+    <!-- SUGGESTION BAR
+         Nagpapakita ng rotating suggestion na maaaring i-click ng user.
+         Pinepreno ito ng JS (startSuggestionBar function) -->
+    <div id="suggestionBar"></div>
+
+    <!-- INPUT AREA
+         Dito nagta-type ang user ng tanong. -->
+    <div class="input-area">
+      <!-- Text input field -->
+      <input type="text" id="userInput" placeholder="Magtanong ka dito...">
+      <!-- Send button — may icon (▶) at text na "Send"
+           Sa mobile, natatago ang "Send" text at icon lang ang natitira
+           para may mas malaking espasyo ang input field -->
+      <button id="sendBtn">
+        <span class="send-icon">▶</span>
+        <span class="send-text">Send</span>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- JS file — defer = hindi mag-load ang script hanggang tapos na ang HTML
+       para hindi mabagalan ang pagpapakita ng page -->
+  <script src="ask-ai.js" defer></script>
+</body>
+</html>

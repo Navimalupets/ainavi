@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<!-- Sinasabi nito sa browser na HTML5 ang ginagamit -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Tinitiyak na tama ang display size sa mobile.
+         initial-scale=1.0 = normal zoom level sa simula -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navi Website</title>
+    <!-- Kinukuha ang CSS file para sa lahat ng styling ng page -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Kinukuha ang pixel font mula sa Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- BACKGROUND LAYER
+       Hiwalay na div ang background GIF para hindi mag-flash.
+       Ang GIF ay nasa sariling GPU layer (tingnan ang style.css
+       para sa detalyadong explanation ng will-change trick) -->
+  <div class="bg-layer"></div>
+
+  <!-- SCANLINES OVERLAY
+       Nagdadagdag ng retro CRT effect — parang lumang TV screen.
+       pointer-events: none ang CSS nito para hindi nito
+       nahaharang ang mga click ng user -->
+  <div class="scanlines"></div>
+
+  <!-- CUSTOM CURSOR
+       Dalawang div ang custom cursor:
+       .cursor = malaking circle na may lag effect (sumusunod nang mabagal)
+       .cursor-dot = maliit na dot na instant na sumusunod sa mouse -->
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
+
+  <!-- ============================================
+       INTRO OVERLAY
+       Lalabas ito bago mapasok ang homepage.
+       May tatlong paths:
+       1. Kakilala → Birthday check → Name input
+       2. Hindi kakilala → Reason input → Name input
+       Itinatago/ipinapakita ang bawat step gamit ang JS.
+       ============================================ -->
+  <div id="intro-overlay">
+    <div class="intro-box">
+
+      <!-- STEP 1: Tanong kung kakilala o hindi -->
+      <div id="step1">
+        <h2>Kakilala mo ba si Navi?</h2>
+        <div class="btn-group">
+          <!-- knownYes() = papunta sa step4 (birthday check)
+               knownNo()  = papunta sa step2 (reason input) -->
+          <button onclick="knownYes()">Yes</button>
+          <button onclick="knownNo()">No</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Para sa hindi kakilala — bakit sila nandito?
+           May validation: minimum 3 words at may Tagalog word -->
+      <div id="step2" style="display:none;">
+        <h2>Bakit ka nandito?</h2>
+        <input type="text" id="reason" placeholder="Type your reason...">
+        <!-- nextToName() = vina-validate ang reason, papunta sa step3 -->
+        <button onclick="nextToName()">Next →</button>
+      </div>
+
+      <!-- STEP 3: Para sa lahat — anong pangalan nila?
+           Itinatago ang pangalan sa localStorage -->
+      <div id="step3" style="display:none;">
+        <h2>Anong pangalan mo?</h2>
+        <input type="text" id="username" placeholder="Type your name...">
+        <!-- enterSite() = ini-save ang pangalan, papunta sa step5 -->
+        <button onclick="enterSite()">Enter →</button>
+      </div>
+
+      <!-- STEP 4: Para sa mga kakilala — birthday check
+           Kailangan malaman ang tamang birthday ni Navi -->
+      <div id="step4" style="display:none;">
+        <h2>Ano ang birthday ni Navi?</h2>
+        <!-- type="date" = nagpapakita ng date picker sa browser -->
+        <input type="date" id="birthday">
+        <!-- checkBirthday() = vina-validate ang date, papunta sa step3 -->
+        <button onclick="checkBirthday()">Next →</button>
+      </div>
+
+      <!-- STEP 5: Welcome message pagkatapos maipasok ang pangalan
+           Dito ipinapakita ang personalized greeting -->
+      <div id="step5" style="display:none;">
+        <!-- Blinking glowing star icon -->
+        <div class="welcome-glow">✦</div>
+        <!-- Papalapitin ng JS ang pangalan ng user dito -->
+        <h2 id="hello-user">Hello!</h2>
+        <!-- goToHome() = itago ang overlay, ipakita na ang homepage -->
+        <button onclick="goToHome()">Enter Site →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================
+       HEADER AT NAVIGATION
+       ============================================ -->
+  <header>
+    <nav class="navbar">
+      <!-- Logo na may magenta brackets para sa retro look -->
+      <h2 class="logo">
+        <span class="logo-bracket">[</span>
+        Navi
+        <span class="logo-bracket">]</span>
+      </h2>
+      <!-- Navigation links -->
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Send a message</a></li>
+        <li><a href="#">Projects</a></li>
+        <!-- nav-highlight = espesyal na styling para mapansin ang link na ito -->
+        <li><a href="ask-ai.html" class="nav-highlight">Ask with AI ✦</a></li>
+      </ul>
+    </nav>
+
+    <!-- SCROLLING TICKER
+         Parang news ticker — scrolling text sa ilalim ng nav.
+         Ang text ay dina-duplicate para seamless ang loop
+         (sa CSS, ang animation ay nag-translate ng -50%) -->
+    <div class="ticker-wrap">
+      <div class="ticker">
+        <span>★ Welcome to Navi's Website</span>
+        <span>★ Computer Science Student</span>
+        <span>★ Check out Ask with AI</span>
+        <span>★ Made with ♥ and code</span>
+        <!-- Duplicate ng mga text para walang gaps sa loop -->
+        <span>★ Welcome to Navi's Website</span>
+        <span>★ Computer Science Student</span>
+        <span>★ Check out Ask with AI</span>
+        <span>★ Made with ♥ and code</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================
+       HERO SECTION — RPG SHOP SIGN
+       Ito ang pangunahing section ng page.
+       Naglalaman ng hanging sign na parang
+       mga tindahan sa background ng GIF.
+       ============================================ -->
+  <section class="hero">
+    <div class="hero-content">
+      <!-- Subtitle sa itaas ng sign -->
+      <p class="hero-sub">// WELCOME TO</p>
+
+      <!-- RPG SHOP SIGN — buong structure ng hanging sign -->
+      <div class="sign-wrap">
+
+        <!-- HANGING CHAIN sa taas ng sign
+             Mga maliit na rectangles at isang bilog na bolt
+             na gumagaya sa chain na nagsusuporta sa sign -->
+        <div class="sign-chain">
+          <div class="chain-link"></div>
+          <div class="chain-link"></div>
+          <div class="chain-link"></div>
+          <!-- Bilog na bolt sa dulo ng chain -->
+          <div class="chain-bolt"></div>
+        </div>
+
+        <!-- MAIN SIGN BOARD — pangunahing kahon ng sign -->
+        <div class="sign-board">
+
+          <!-- PIXEL CORNER ORNAMENTS
+               SVG graphics sa apat na sulok ng sign.
+               Gawa sa mga colored rectangles na nagbibigay
+               ng pixel art na hitsura. -->
+          <div class="sign-corner corner-tl">
+            <svg width="28" height="28" viewBox="0 0 28 28"><rect x="0" y="0" width="8" height="8" fill="#ff00ff"/><rect x="8" y="0" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="0" y="8" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="12" y="4" width="4" height="4" fill="#00ffff" opacity=".4"/><rect x="4" y="12" width="4" height="4" fill="#00ffff" opacity=".4"/></svg>
+          </div>
+          <div class="sign-corner corner-tr">
+            <svg width="28" height="28" viewBox="0 0 28 28"><rect x="20" y="0" width="8" height="8" fill="#ff00ff"/><rect x="16" y="0" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="24" y="8" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="12" y="4" width="4" height="4" fill="#00ffff" opacity=".4"/><rect x="20" y="12" width="4" height="4" fill="#00ffff" opacity=".4"/></svg>
+          </div>
+          <div class="sign-corner corner-bl">
+            <svg width="28" height="28" viewBox="0 0 28 28"><rect x="0" y="20" width="8" height="8" fill="#ff00ff"/><rect x="8" y="24" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="0" y="16" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="12" y="20" width="4" height="4" fill="#00ffff" opacity=".4"/><rect x="4" y="12" width="4" height="4" fill="#00ffff" opacity=".4"/></svg>
+          </div>
+          <div class="sign-corner corner-br">
+            <svg width="28" height="28" viewBox="0 0 28 28"><rect x="20" y="20" width="8" height="8" fill="#ff00ff"/><rect x="16" y="24" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="24" y="16" width="4" height="4" fill="#ff00ff" opacity=".5"/><rect x="12" y="20" width="4" height="4" fill="#00ffff" opacity=".4"/><rect x="20" y="12" width="4" height="4" fill="#00ffff" opacity=".4"/></svg>
+          </div>
+
+          <!-- BLINKING DOT LIGHTS sa paligid ng border
+               Apat na div — isa bawat gilid (top, bottom, left, right).
+               Gawa sa repeating-linear-gradient sa CSS na gumagawa ng
+               alternating na may at walang kulay na dots.
+               May blink animation para parang neon lights. -->
+          <div class="sign-lights sign-lights-top"></div>
+          <div class="sign-lights sign-lights-bottom"></div>
+          <div class="sign-lights sign-lights-left"></div>
+          <div class="sign-lights sign-lights-right"></div>
+
+          <!-- SIGN INNER CONTENT — ang laman ng sign board -->
+          <div class="sign-inner">
+            <!-- Label sa taas — may glow effect -->
+            <div class="sign-label-top">★ EST. 2025 ★</div>
+
+            <!-- Pangunahing title — may glitch effect sa "WORLD"
+                 data-text attribute = ginagamit ng CSS para sa glitch effect
+                 (kinokopya ng ::before at ::after pseudo-elements ang text nito) -->
+            <h1 class="hero-title">NAVI'S<br><span class="glitch" data-text="WORLD">WEBSITE</span></h1>
+
+            <!-- Decorative divider sa gitna ng sign -->
+            <div class="sign-divider">
+              <span>◆</span>
+              <span class="divider-line"></span> <!-- horizontal line -->
+              <span>◆</span>
+            </div>
+
+            <!-- Label sa ibaba -->
+            <div class="sign-label-bottom">COMPUTER SCIENCE</div>
+          </div>
+        </div>
+
+        <!-- HANGING SUB-SIGN sa ibaba ng main sign
+             May sariling chain at mas maliit na sign board
+             na may blinking animation (parang neon sign na
+             malapit nang mag-burnout) -->
+        <div class="sign-sub-chain">
+          <div class="chain-link small"></div>
+          <div class="chain-link small"></div>
+        </div>
+        <div class="sign-sub">
+          <span>[ Ask the AI ↓ ]</span>
+        </div>
+      </div>
+
+      <!-- Description text sa ibaba ng sign -->
+      <p class="hero-desc">Building things for fun since day one.</p>
+      <!-- CTA button — naka-link sa AI page -->
+      <a href="ask-ai.html" class="hero-btn">Ask the AI ✦</a>
+    </div>
+
+    <!-- Floating pixel squares sa background ng hero section
+         Gumagalaw pataas-pababa nang random (floatDeco animation) -->
+    <div class="pixel-deco deco-1"></div>
+    <div class="pixel-deco deco-2"></div>
+    <div class="pixel-deco deco-3"></div>
+  </section>
+
+  <!-- ============================================
+       MUSIC SLIDER
+       Awtomatikong gumagalaw na carousel ng
+       Spotify embeds. Ang JS ang nag-a-animate
+       nito gamit ang requestAnimationFrame.
+       ============================================ -->
+  <section class="music-slider">
+    <div class="slider-wrapper">
+      <!-- Section header -->
+      <div class="slider-header">
+        <h3><span class="section-prefix">▶</span> Favorite Music</h3>
+      </div>
+      <!-- slider-outer = overflow: hidden — nagtatago ng mga card
+           na nasa labas ng visible area -->
+      <div class="slider-outer">
+        <!-- slider-track = ang aktwal na gumagalaw na container
+             will-change: transform at translate3d sa CSS/JS para
+             sa GPU-accelerated animation (walang flash) -->
+        <div class="slider-track" id="sliderTrack">
+          <!-- Bawat .song ay isang Spotify embed card
+               loading="lazy" = hindi mag-load ang iframe
+               hanggang malapit na ito sa visible area (mas mabilis) -->
+          <div class="song"><iframe src="https://open.spotify.com/embed/track/1tGwT7xlOobsO5X1R3aRdo" loading="lazy" width="320" height="160" frameborder="0" allow="autoplay; clipboard-write; encrypted-media;"></iframe></div>
+          <div class="song"><iframe src="https://open.spotify.com/embed/track/5H1MDb60jJ5zo9RHvYXQvf" loading="lazy" width="320" height="160" frameborder="0" allow="autoplay; clipboard-write; encrypted-media;"></iframe></div>
+          <div class="song"><iframe src="https://open.spotify.com/embed/track/3eX9eVf7I8HJELRM3qcS83" loading="lazy" width="320" height="160" frameborder="0" allow="autoplay; clipboard-write; encrypted-media;"></iframe></div>
+          <div class="song"><iframe src="https://open.spotify.com/embed/track/56e3PqhB8rZTqBZumD9vv1" loading="lazy" width="320" height="160" frameborder="0" allow="autoplay; clipboard-write; encrypted-media;"></iframe></div>
+          <div class="song"><iframe src="https://open.spotify.com/embed/track/3my3X3bGG7pnowiOnleCLP" loading="lazy" width="320" height="160" frameborder="0" allow="autoplay; clipboard-write; encrypted-media;"></iframe></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       ABOUT SECTION
+       Maikling intro tungkol sa may-ari.
+       ============================================ -->
+  <section class="about-speech">
+    <!-- Magenta tag label sa taas -->
+    <div class="about-tag">// ABOUT</div>
+    <p>
+      Hi! I'm <strong>Cristopher Ivan Gavarra</strong>, a student of Computer Science.<br><br>
+      I made this website just for fun — there's no other reason.<br>
+      If you're here to learn more about me, check out
+      <a href="ask-ai.html">Ask with AI ↗</a> to get your questions answered.
+    </p>
+  </section>
+
+  <!-- FOOTER — copyright at credit -->
+  <footer class="site-footer">
+    <p>© 2025 Navi Website &nbsp;|&nbsp; Built with ♥</p>
+  </footer>
+
+  <!-- JS file — defer = mag-load pagkatapos ng HTML
+       para hindi mabagalan ang pagpapakita ng page -->
+  <script src="script.js" defer></script>
+</body>
+</html>

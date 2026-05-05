@@ -1,0 +1,138 @@
+{
+  "greet": {
+  "hi": "Hi Magandang araw sayo. Nandito ka ngayon sa website na gawa ni Navi, may mga katanungan ka ba na gusto mo itanong sa kanya? Maaari kitang tulungan kung kailangan mo ng tulong mag-sabi ka lang. ",
+  "hello": "Hello Magandang araw sayo. Nandito ka ngayon sa website na gawa ni Navi, may mga katanungan ka ba na gusto mo itanong sa kanya? Maaari kitang tulungan kung kailangan mo ng tulong mag-sabi ka lang. ",
+  "yo": "Yo mah g! magandang araw sayo man. Nandito ka ngayon sa website na gawa ni Navi, may mga katanungan ka ba na gusto itanong sa kanya? Hayaan mong tulungan kita san mo ba gusto mag simula g?.",
+  "yow": "Yow mah g! magandang araw sayo man. Nandito ka ngayon sa website na gawa ni Navi, may mga katanungan ka ba na gusto itanong sa kanya? Hayaan mong tulungan kita san mo ba gusto mag simula g?."
+  },
+  "name":{
+    "nickname": "Navi",
+    "first": "Cristopher Ivan",
+    "middle": "Licayan",
+    "last": "Gavarra"
+    
+  },
+  "aboutme": "Hi si Navi ang gumawa nitong website at sya ang nag set-up sakin upang sagutin ang mga bagay na gusto mo malaman tungkol sa kanya, pwede kita bigyan ng guide kung saan ka pwede magstart sa pagtatanong like\n(Ilang taon, Anong paboritong kulay,pagkain at hoobies ni Navi, Mga pangalan ng kabigan nya, Saan syang School nag-aral).\n Hayaan mokong tulungan ka  ",
+  "zodiac": "Aquarius",
+  "age": 23,
+  "height": "5'3",
+  "nationality": "Filipino",
+  "student": true,
+  "bday": "January 22",
+  "born": "January 22 2003",
+  "placeofbirth": "Valenzuela",
+  "currenthome": "Pook United, Loma De Gato, Marilao, Bulacan",
+  "school": {
+    "elementary": "Loma De Gato Elementary School",
+    "highschool": "Prenza National High School",
+    "seniorHigh": {
+      "school": "Prenza National High School",
+      "strand": "GAS (General Academic Strand)"
+    },
+    "college": "PDM/Pambayang Dalubhasaan ng Marilao",
+    "course": "Computer Science"
+  },
+  "personality": {
+  "traits": ["Tahimik", "Observant", "Direkta magsalita"],
+  "strengths": ["Honest", "Loyal"],
+  "weaknesses": ["Minsan overthinker", "Madaling mairita"],
+  "examples": {
+    "strength": "Kapag kailangan ng payo, tapat siyang magsabi ng totoo kahit mahirap pakinggan",
+    "weakness": "Kapag may mali, madali syang mairita at mag-overthink"
+  }
+  },
+  "petpeeves": 
+    ["Maingay habang nagfofocus","Bossy","Paulit-ulit","Pasikat pag may babae","Sinungaling!!"]
+    ,
+  "faveplace":{
+    "country": ["Japan"]
+  },
+  "favorites": {
+    "movies": ["Action", "Sci-Fi", "Horror"],
+    "games": ["Joan of Arc", "Dota", "Guitar Hero", "Mobile Legends", "PUBG"],
+    "colors": [
+      {
+        "name": "Black",
+        "reason": "Sobrang na aastigan si Navi sa kulay na black. Ito yung pinaka unang naging paborito nyang kulay kasi sobrang presko lang sa mata" 
+      },
+      {
+        "name": "Purple",
+        "reason": "Ito yung pinaka last na nagustuhan ni Navi na kulay. kasi sobrang kalmado nito tignan parang bulaklak lang na lavender yang bulaklak na yan yung pinaka dahilan kung bat nagustugan ni Navi ang purple."
+      },
+      {
+        "name": "Red",
+        "reason": "dito naman kung bat pula ang isa sa mga paboritong kulay ni navi kasi, ito ay sumisimbulo sa puso o pagmamahal yun lang naman wala ng iba pang rason."
+      },
+      {
+        "name": "Cyan",
+        "reason":"Itong kulay na to kaya nagustuhan ni Navi kasi parang katulad sya ng kalangitan sa tuwing natatakpan ng ulap ang araw, nagiging kalmado si Navi kapag nakikita nya ang kulay na to at tila pang parang ang gaan ng pakiramdam nya. Kaya pag nakita mo si Navi na nakatingin sa langit sobrang kalmado nyan."
+      }],
+    "hobbies": ["Making music", "Basketball", "Listening Music"],
+    "food": ["Adobo", "Sinigang","Pritong manok"]
+  },
+  "friendgender": {
+    "girl":  "Madaming kaibigang babae si Navi pero hindi ibig sabihin na gusto niya lahat. Nasasanay lang siya makipagkaibigan sa babae. Pero ako alam ko naman na isa lang taong gusto ni Navi pero di na nya muna priority yan.",
+    "boy": "Bilang lang tropa/kaibigan ni Navi alam nya na yon kung sino nakikita mong kasama nya sa mga post nya sa IG, FB o kahit saang social platform matic tropa nyang malupit yon."
+
+  },
+  "listoffriend": {
+    "boys": ["Adam", "Ryan", "Ibrahim", "Alnabe", "Sherwil", "Paul"],
+    "girls": ["Alliah", "Mariel", "Shane"]
+  },
+
+  "notfavorite": {
+    "colors": [
+      { 
+        "name": "Yellow", 
+        "reason": "Sobrang nakakairita sa mata, at nahihilo si Navi kapag nakakakita" 
+      }
+      ],
+        "food": [
+      { "name": "Chocolate Bar, Cherry Flavor",  
+        "reason": "Masyadong naiirita kapag dumidikit sa ngipin"
+      }
+      ],
+    "person": [
+      {
+        "type": "Plastic at Sinungaling",
+        "behavior": "Ayaw ni Navi ng plastic na tao. Malakas makaramdam si Navi kung hindi ka totoo.",
+        "attitude": "Kung masyado kang dudero/dudera, matic huli mo inis ni Navi at papansinin ka nya."
+      }
+    ]
+  },
+
+    "crush": {
+      "name": "Secret",
+      "Yes": {
+        "clues": [
+          "Nung Pandemic nya lang nakilala",
+          "Nakakausap naman sya pero bihira na",
+          "Mahilig sa volleyball",
+          "May buhok at mata"
+        ],
+        "nextStep": "Gusto mo pa ng hint tungkol sa personality niya?"
+      },
+      "No": "Okay, naiintindihan, puwede ka pa magtanong ng ibang bagay tungkol kay Navi."
+    },
+
+  "funfacts": [
+  "Si Navi ay sobrang bait",
+  "Mahilig siya sa Anime",
+  "Mahilig siya sa Japanese culture",
+  "Ayaw na ayaw ni Navi ng kape "
+],
+"quotes": [
+  "Honesty is the best policy.",
+  "Work hard, play hard."
+],
+
+  "stupidmessage":{
+    "bobo": "Wow makabobo matalino ka bai??",
+    "tanga": "Mas tnga ka siguro kesa sakin ya!",
+    "gago": "Keep Barking dog!",
+    "tanginamo": "Sagad mura gusto, ligo ayaw?",
+    "ulol": " Ulol ka rin ya!! monggi monggi yarn?",
+    "./.": "Kainin mo oh!"
+  }
+  
+}

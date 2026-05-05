@@ -1,0 +1,1051 @@
+/* ============================================
+   VARIABLES & RESET
+   ============================================ */
+
+/* Dito mo ilalagay lahat ng colors at fonts na gagamitin mo sa buong CSS.
+   Para kung gusto mong palitan ang kulay, dito ka lang mag-edit — isang beses lang. */
+:root {
+  --cyan: #00ffff;
+  --magenta: #ff00ff;
+  --yellow: #ffff00;
+  --dark: #000000;
+  --dark2: rgba(0,0,0,0.75);
+  --font-pixel: 'Press Start 2P', cursive;
+}
+
+/* I-reset lahat ng default margin/padding ng browser.
+   Ang box-sizing: border-box = ang padding at border ay kasama na
+   sa total na width/height ng element, hindi na idadagdag pa. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Smooth scrolling kapag nag-click ng anchor links (ex: #about, #music) */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   BACKGROUND
+   ============================================ */
+
+/* Pangunahing body — itim ang fallback kapag hindi pa na-load ang GIF.
+   cursor: none = tinatago ang default na cursor ng browser
+   kasi may custom cursor tayo (yung .cursor at .cursor-dot). */
+body {
+  margin: 0;
+  background: #000;
+  font-family: var(--font-pixel);
+  color: var(--cyan);
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* Ang background GIF ay hiwalay na div para hindi mag-flash.
+   Bakit? Kapag may animation sa page (slider, glitch, etc.), ang browser
+   ay nag-rerender ng layout. Kung kasama ang GIF sa normal na flow,
+   nire-render din siya ulit at nag-fla-flash.
+   
+   Solusyon: ilagay sa sariling GPU layer gamit ang:
+   - position: fixed = nananatili sa lugar kahit mag-scroll
+   - z-index: -2 = nasa pinaka-ilalim, sa likod ng lahat
+   - will-change: transform = sinasabi sa browser na ihanda na ang sariling layer
+   - transform: translateZ(0) = pinipilit ang GPU acceleration */
+.bg-layer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: url(https://i.redd.it/v60t49y990ue1.gif);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Yung parang TV scanline effect para mukhang retro CRT monitor.
+   repeating-linear-gradient = gumagawa ng paulit-ulit na manipis na itim na linya bawat 4px.
+   pointer-events: none = hindi nito haharangan ang mga clicks ng user. */
+.scanlines {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+
+/* Malaking bilog na sumusunod sa mouse — kino-control ng JavaScript.
+   mix-blend-mode: difference = ino-invert niya ang kulay ng background
+   sa kung saan naroroon ang cursor, para laging visible ito. */
+.cursor {
+  position: fixed;
+  width: 24px; height: 24px;
+  border: 2px solid var(--cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, border-color 0.2s;
+  mix-blend-mode: difference;
+}
+
+/* Maliit na tuldok sa gitna ng cursor.
+   Mas mabilis ang transition (0.05s) kaysa sa malaking bilog (0.1s)
+   para magmukhang may slight na lag ang bilog — mas maganda sa mata. */
+.cursor-dot {
+  position: fixed;
+  width: 4px; height: 4px;
+  background: var(--cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s ease;
+}
+
+/* ============================================
+   INTRO OVERLAY
+   ============================================ */
+
+/* Full-screen na modal na lalabas bago makita ang main page.
+   backdrop-filter: blur = ino-blur ang background sa likod ng overlay.
+   z-index: 9999 = nasa harap ng lahat (pero hindi ng cursor na 99999). */
+#intro-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: overlayFadeIn 0.5s ease;
+}
+
+/* Fade in mula transparent papuntang visible */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Ang kahon sa gitna ng overlay.
+   animation: boxSlideIn — lumilitaw mula sa ibaba papataas.
+   "0.2s both" = mag-aantay ng 0.2s bago mag-animate,
+   at mananatili sa final state pagkatapos. */
+.intro-box {
+  background: rgba(0,0,0,0.9);
+  border: 2px solid var(--cyan);
+  padding: 50px 40px;
+  text-align: center;
+  color: white;
+  font-family: var(--font-pixel);
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(0,255,255,0.3), 0 0 60px rgba(0,255,255,0.1);
+  animation: boxSlideIn 0.5s ease 0.2s both;
+  position: relative;
+}
+
+/* Ang corner decorations ng intro box — walang extra HTML, pseudo-elements lang.
+   Ang bawat isa ay nagpapakita ng dalawang gilid ng border para gumawa ng "L" shape sa sulok.
+   ::before = top-left corner
+   ::after = bottom-right corner */
+.intro-box::before, .intro-box::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: var(--magenta);
+  border-style: solid;
+}
+.intro-box::before {
+  top: -2px; left: -2px;
+  border-width: 2px 0 0 2px; /* top at left border lang */
+}
+.intro-box::after {
+  bottom: -2px; right: -2px;
+  border-width: 0 2px 2px 0; /* right at bottom border lang */
+}
+
+@keyframes boxSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.intro-box h2 {
+  font-size: 13px;
+  color: var(--cyan);
+  margin-bottom: 28px;
+  line-height: 1.7;
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+.btn-group {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+/* Ang hover effect ng button — ang cyan fill ay "nag-sli-slide" papasok mula sa kaliwa.
+   Paano gumagana:
+   1. Ang ::before pseudo-element ay nakatago sa kaliwa (left: -100%)
+   2. Kapag hover, nililipat sa left: 0 para lumabas
+   3. z-index: -1 para nasa likod ng text ang fill */
+.intro-box button {
+  margin: 8px 0;
+  padding: 12px 24px;
+  border: 2px solid var(--cyan);
+  background: transparent;
+  color: var(--cyan);
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden; /* para hindi lumabas ang ::before sa labas ng button */
+}
+
+.intro-box button::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; /* nakatago sa kaliwa */
+  width: 100%; height: 100%;
+  background: var(--cyan);
+  transition: left 0.2s ease;
+  z-index: -1;
+}
+
+.intro-box button:hover::before {
+  left: 0; /* lumalabas kapag hover */
+}
+
+.intro-box button:hover {
+  color: black; /* itim na text kapag may cyan fill na ang background */
+  box-shadow: 0 0 15px var(--cyan);
+}
+
+.intro-box input {
+  display: block;
+  width: 100%;
+  margin: 16px 0 20px;
+  padding: 12px;
+  border: 2px solid var(--cyan);
+  background: rgba(0,255,255,0.05);
+  color: white;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+
+.intro-box input:focus {
+  box-shadow: 0 0 12px rgba(0,255,255,0.4);
+}
+
+.intro-box input::placeholder {
+  color: rgba(0,255,255,0.4);
+}
+
+/* Yung glowing icon sa welcome step.
+   Ang pulse animation ay pabago-bago ng laki (scale) at opacity
+   para magmukhang "humihinga" o "tumitibok". */
+.welcome-glow {
+  font-size: 28px;
+  color: var(--cyan);
+  text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan);
+  margin-bottom: 20px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.15); }
+}
+
+/* ============================================
+   HEADER & NAV
+   ============================================ */
+
+/* backdrop-filter: blur = frosted glass effect kapag nag-scroll
+   at nakikita ang content sa likod ng header. */
+header {
+  position: relative;
+  border-bottom: 1px solid rgba(0,255,255,0.3);
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+}
+
+.logo {
+  font-family: var(--font-pixel);
+  font-size: 20px;
+  color: var(--cyan);
+  letter-spacing: 2px;
+}
+
+/* Yung [ ] brackets sa logo — magenta ang kulay para mag-pop out */
+.logo-bracket {
+  color: var(--magenta);
+  text-shadow: 0 0 8px var(--magenta);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+/* Transparent na border kapag normal state para hindi mag-jump ang layout
+   pag lalabas ang border sa hover — consistent ang size ng element. */
+.nav-links a {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--cyan);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.nav-links a:hover {
+  border-color: var(--cyan);
+  color: var(--magenta);
+  text-shadow: 0 0 8px var(--magenta);
+  box-shadow: 0 0 10px rgba(255,0,255,0.2);
+}
+
+/* Special styling para sa "Ask with AI" link — may border kahit walang hover */
+.nav-highlight {
+  border: 1px solid var(--cyan) !important;
+  color: var(--cyan) !important;
+  box-shadow: 0 0 10px rgba(0,255,255,0.2);
+}
+
+.nav-highlight:hover {
+  background: var(--cyan);
+  color: black !important;
+  box-shadow: 0 0 20px rgba(0,255,255,0.5) !important;
+}
+
+/* Yung scrolling text sa ibaba ng nav.
+   Paano gumagana ang loop: ang content ay dinuplicate sa HTML,
+   kaya kapag nag-translate ng -50% (kalahati ng total width),
+   nagsisimula ulit sa simula — walang makikitang jump. */
+.ticker-wrap {
+  overflow: hidden;
+  background: rgba(0,255,255,0.06);
+  border-top: 1px solid rgba(0,255,255,0.15);
+  padding: 6px 0;
+}
+
+.ticker {
+  display: flex;
+  gap: 60px;
+  white-space: nowrap; /* hindi mag-wrap sa next line ang text */
+  animation: ticker 20s linear infinite;
+  font-size: 9px;
+  color: rgba(0,255,255,0.6);
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); /* -50% lang kasi duplicate ang content */ }
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+
+.hero {
+  position: relative;
+  min-height: 55vh; /* hindi bababa sa 55% ng screen height */
+  display: flex;
+  align-items: center;
+  padding: 50px 40px 60px;
+  overflow: hidden;
+}
+
+/* z-index: 2 para nasa harap ng mga pixel-deco na nasa background ng hero */
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-sub {
+  font-size: 10px;
+  color: var(--magenta);
+  letter-spacing: 3px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.6s ease 0.2s both;
+}
+
+/* ============================================
+   RPG SHOP SIGN
+   ============================================ */
+
+/* Dalawang animation ang naka-assign dito:
+   1. fadeInUp — lumilitaw mula sa ibaba (isang beses lang)
+   2. sway — patuloy na umuuga parang nakabitin na sign
+   transform-origin: top center = ang pivot point ng pag-uga ay nasa taas */
+.sign-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeInUp 0.7s ease 0.3s both, sway 5s ease-in-out 1s infinite;
+  transform-origin: top center;
+}
+
+/* Maliit na uga lang (±0.6 degrees) para realistic */
+@keyframes sway {
+  0%, 100% { transform: rotate(-0.6deg); }
+  50%       { transform: rotate(0.6deg); }
+}
+
+/* === CHAIN NA NAKITA SA TAAS NG SIGN === */
+.sign-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 0;
+}
+
+/* Bawat link ng chain — simpleng rectangular na may rounded corners */
+.chain-link {
+  width: 10px;
+  height: 7px;
+  border: 2px solid rgba(0,255,255,0.6);
+  border-radius: 3px;
+  background: rgba(0,255,255,0.08);
+}
+
+.chain-link.small {
+  width: 8px;
+  height: 5px;
+}
+
+/* Yung bilog na bolt/rivet sa dulo ng chain */
+.chain-bolt {
+  width: 6px;
+  height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--cyan);
+  margin-top: 2px;
+}
+
+/* === PANGUNAHING SIGN BOARD === */
+
+/* Maraming layered na box-shadow para sa depth effect:
+   - Unang tatlo (0 0 0 Xpx) = parang extra na border layers
+   - Susunod na dalawa (0 0 30px/60px) = outer glow
+   - 6px 6px 0 = pixel shadow sa kanan at ibaba
+   - inset = inner glow sa loob ng sign */
+.sign-board {
+  position: relative;
+  background: rgba(0, 8, 20, 0.88);
+  border: 3px solid var(--cyan);
+  box-shadow:
+    0 0 0 1px rgba(0,255,255,0.15),
+    0 0 0 4px rgba(0,0,0,0.9),
+    0 0 0 6px rgba(0,255,255,0.2),
+    0 0 30px rgba(0,255,255,0.25),
+    0 0 60px rgba(0,255,255,0.1),
+    6px 6px 0 rgba(0,255,255,0.08),
+    inset 0 0 40px rgba(0,255,255,0.04);
+  padding: 28px 48px 24px;
+  min-width: 380px;
+}
+
+/* Absolute positioned corner ornaments ng sign.
+   Yung actual na SVG/image ay naka-define sa HTML,
+   dito yung positioning lang. */
+.sign-corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+}
+.corner-tl { top: -2px;  left: -2px; }
+.corner-tr { top: -2px;  right: -2px; }
+.corner-bl { bottom: -2px; left: -2px; }
+.corner-br { bottom: -2px; right: -2px; }
+
+/* === BLINKING LIGHTS SA BORDER NG SIGN === */
+.sign-lights {
+  position: absolute;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sign-lights::before,
+.sign-lights::after,
+.sign-lights span {
+  content: '';
+  display: block;
+}
+
+/* Ang mga dots ay hindi individual na HTML elements —
+   ginagamit ang repeating-linear-gradient para gumawa ng pattern.
+   Bawat 16px: 4px cyan dot, 12px transparent gap.
+   Mas magaan sa performance kaysa sa daan-daang <span> elements. */
+.sign-lights-top,
+.sign-lights-bottom {
+  left: 36px; right: 36px;
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--cyan) 0px,
+    var(--cyan) 4px,
+    transparent 4px,
+    transparent 16px
+  );
+  opacity: 0.5;
+  animation: blink-dots 1.2s step-start infinite;
+}
+
+.sign-lights-top    { top: 8px; }
+.sign-lights-bottom { bottom: 8px; }
+
+/* Katulad ng top/bottom pero vertical at magenta ang kulay,
+   at may 0.6s delay para mag-alternate ang pagkikisap nila */
+.sign-lights-left,
+.sign-lights-right {
+  top: 36px; bottom: 36px;
+  width: 6px;
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--magenta) 0px,
+    var(--magenta) 4px,
+    transparent 4px,
+    transparent 16px
+  );
+  opacity: 0.5;
+  animation: blink-dots 1.2s step-start 0.6s infinite;
+}
+
+.sign-lights-left  { left: 8px; }
+.sign-lights-right { right: 8px; }
+
+/* step-start = instant na pagbabago ng opacity, walang fade —
+   para sa authentic na "blinking bulb" effect */
+@keyframes blink-dots {
+  0%, 49% { opacity: 0.55; }
+  50%, 100% { opacity: 0.2; }
+}
+
+/* === CONTENT SA LOOB NG SIGN === */
+
+/* z-index: 2 para nasa harap ng mga .sign-lights na absolute positioned */
+.sign-inner {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.sign-label-top {
+  font-size: 8px;
+  color: var(--magenta);
+  letter-spacing: 4px;
+  margin-bottom: 14px;
+  text-shadow: 0 0 8px var(--magenta);
+  opacity: 0.85;
+}
+
+.sign-label-bottom {
+  font-size: 8px;
+  color: rgba(0,255,255,0.55);
+  letter-spacing: 3px;
+  margin-top: 10px;
+}
+
+/* Yung linya sa gitna ng sign kasama ang diamond symbol.
+   Ginagamit ang flex para ilagay ang linya at simbolo sa isang row. */
+.sign-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 4px;
+  color: rgba(0,255,255,0.4);
+  font-size: 10px;
+}
+
+/* Ang linya mismo — fade in/out mula sa magkabilang dulo gamit ang gradient */
+.divider-line {
+  display: block;
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,255,0.4), transparent);
+}
+
+/* === MALIIT NA SIGN SA IBABA NG PANGUNAHING SIGN === */
+.sign-sub-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Ang blink animation ng sub-sign ay hindi regular —
+   matagal na on (0-85%), mabilis na off dalawang beses (90%, 97%),
+   para magmukhang parang may sira ang kuryente. */
+.sign-sub {
+  background: rgba(0,0,0,0.85);
+  border: 2px solid var(--magenta);
+  padding: 8px 20px;
+  font-size: 9px;
+  color: var(--magenta);
+  text-shadow: 0 0 8px var(--magenta);
+  box-shadow: 0 0 12px rgba(255,0,255,0.2), 0 0 0 3px rgba(0,0,0,0.9), 0 0 0 5px rgba(255,0,255,0.1);
+  letter-spacing: 1px;
+  animation: subSignBlink 3s ease-in-out infinite;
+}
+
+@keyframes subSignBlink {
+  0%, 85%, 100% { opacity: 1; }
+  90%           { opacity: 0.4; }
+  95%           { opacity: 1; }
+  97%           { opacity: 0.3; }
+}
+
+/* === PANGUNAHING TITLE SA LOOB NG SIGN === */
+
+/* clamp(min, preferred, max) = responsive font size.
+   Ex: clamp(28px, 5vw, 54px) = hindi bababa sa 28px,
+   gumagamit ng 5% ng viewport width, pero hindi lalampas sa 54px. */
+.hero-title {
+  font-size: clamp(28px, 5vw, 54px);
+  line-height: 1.25;
+  color: var(--cyan);
+  text-shadow:
+    0 0 10px var(--cyan),
+    0 0 30px rgba(0,255,255,0.5),
+    0 0 60px rgba(0,255,255,0.2);
+  margin: 0;
+}
+
+/* === GLITCH EFFECT === */
+
+/* Paano gumagana ang glitch:
+   1. Ang .glitch element ay may data-text attribute na kopya ng text
+   2. Ang ::before at ::after ay gumagamit ng content: attr(data-text)
+      para ipakita ang parehong text sa ibabaw ng original
+   3. clip-path ay nagtatakda kung aling bahagi lang ang visible:
+      ::before = itaas na 35% ng text
+      ::after = ibabang 35% ng text
+   4. Ang animations ay nag-sho-shift ng position at nagpapakita lang
+      ng ilang milliseconds para sa "glitching" na epekto */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text); /* kinukopya ang text mula sa HTML attribute */
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.glitch::before {
+  color: var(--magenta);
+  animation: glitch1 3s infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); /* itaas na bahagi lang */
+}
+
+.glitch::after {
+  color: #00ff00;
+  animation: glitch2 3s infinite;
+  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); /* ibabang bahagi lang */
+}
+
+/* opacity: 0 sa karamihan ng oras — makikita lang ng ilang frames */
+@keyframes glitch1 {
+  0%, 90%, 100% { transform: translate(0); opacity: 0; }
+  92%           { transform: translate(-3px, 1px); opacity: 0.8; }
+  94%           { transform: translate(3px, -1px); opacity: 0.8; }
+  96%           { transform: translate(0); opacity: 0; }
+}
+
+@keyframes glitch2 {
+  0%, 90%, 100% { transform: translate(0); opacity: 0; }
+  93%           { transform: translate(3px, 2px); opacity: 0.7; }
+  95%           { transform: translate(-3px, -1px); opacity: 0.7; }
+  97%           { transform: translate(0); opacity: 0; }
+}
+
+.hero-desc {
+  font-size: 10px;
+  color: rgba(0,255,255,0.6);
+  margin: 28px 0 28px;
+  line-height: 1.8;
+  animation: fadeInUp 0.6s ease 0.8s both;
+}
+
+/* Parehong slide-fill hover trick tulad ng intro button */
+.hero-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border: 2px solid var(--cyan);
+  color: var(--cyan);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.2s ease;
+  animation: fadeInUp 0.6s ease 1s both;
+}
+
+.hero-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: var(--cyan);
+  transition: left 0.25s ease;
+  z-index: -1;
+}
+
+.hero-btn:hover::before { left: 0; }
+.hero-btn:hover {
+  color: black;
+  box-shadow: 0 0 25px rgba(0,255,255,0.5);
+}
+
+/* Tatlong floating na pixel squares sa hero.
+   Gumagamit ng absolute positioning at animation-delay
+   para mag-float sila sa magkaibang oras — hindi sabay-sabay. */
+.pixel-deco {
+  position: absolute;
+  background: var(--cyan);
+  opacity: 0.15;
+  animation: floatDeco 4s ease-in-out infinite;
+}
+
+.deco-1 { width: 8px; height: 8px; right: 20%; top: 30%; animation-delay: 0s; }
+.deco-2 { width: 5px; height: 5px; right: 35%; top: 60%; animation-delay: 1.5s; }
+.deco-3 { width: 12px; height: 12px; right: 15%; top: 70%; animation-delay: 0.8s; }
+
+/* Gumaganaw pataas-pababa at umiikot ng 45 degrees */
+@keyframes floatDeco {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-16px) rotate(45deg); }
+}
+
+/* Ginagamit ng maraming elements sa page — fade in habang gumagalaw pataas */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   MUSIC SLIDER
+   ============================================ */
+
+.music-slider {
+  padding: 40px 0 50px;
+  color: white;
+  overflow: hidden;
+}
+
+.slider-wrapper {
+  max-width: 100%;
+  padding: 0 40px;
+}
+
+.slider-header {
+  margin-bottom: 20px;
+}
+
+.slider-header h3 {
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  color: var(--cyan);
+  background: rgba(0,0,0,0.6);
+  padding: 8px 18px;
+  display: inline-block;
+  border-left: 3px solid var(--magenta);
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+.section-prefix {
+  color: var(--magenta);
+  margin-right: 8px;
+}
+
+/* Ang overflow:hidden ay dito sa wrapper, HINDI sa .slider-track.
+   Bakit? Para matawag na will-change ang .slider-track nang hindi
+   naki-clip ang overflow effect. */
+.slider-outer {
+  overflow: hidden;
+}
+
+/* Parehong GPU trick tulad ng .bg-layer —
+   will-change + translateZ = sariling layer sa GPU,
+   hindi mag-fla-flash kapag gumagalaw ang GIF background.
+   Walang transition property dito — ang JavaScript ang bahala
+   sa pag-animate ng slider. */
+.slider-track {
+  display: flex;
+  gap: 20px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.song {
+  flex: 0 0 295px; /* fixed na 295px ang lapad, hindi mag-shrink o mag-grow */
+  height: 160px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+  border: 1px solid rgba(0,255,255,0.1);
+}
+
+.song:hover {
+  transform: scale(1.04) translateY(-4px); /* lumaki ng konti at umaangat */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,255,255,0.3);
+  border-color: rgba(0,255,255,0.4);
+  z-index: 10; /* para nasa harap ng mga katabi na song cards */
+}
+
+.song iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block; /* tinatanggal ang extra space sa ibaba ng iframe */
+}
+
+/* ============================================
+   ABOUT SECTION
+   ============================================ */
+
+/* border-left: 3px solid magenta = yung accent line sa kaliwa ng about box.
+   border-radius: 0 kaya hindi rounded ang kaliwa para maayos ang accent line. */
+.about-speech {
+  margin: 20px auto 40px;
+  padding: 35px 40px;
+  max-width: 760px;
+  color: var(--cyan);
+  font-family: var(--font-pixel);
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(0,255,255,0.3);
+  border-left: 3px solid var(--magenta);
+  line-height: 2;
+  font-size: 11px;
+  position: relative;
+}
+
+.about-tag {
+  font-size: 9px;
+  color: var(--magenta);
+  margin-bottom: 14px;
+  letter-spacing: 2px;
+}
+
+.about-speech strong {
+  color: white;
+  text-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+
+/* Links sa about section — may underline na border (hindi text-decoration)
+   para mas madaling i-animate ang kulay kapag hover */
+.about-speech a {
+  color: var(--magenta);
+  text-decoration: none;
+  border-bottom: 1px solid var(--magenta);
+  transition: all 0.2s;
+}
+
+.about-speech a:hover {
+  color: var(--yellow);
+  border-color: var(--yellow);
+  text-shadow: 0 0 8px var(--yellow);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 9px;
+  color: rgba(0,255,255,0.35);
+  border-top: 1px solid rgba(0,255,255,0.1);
+  background: rgba(0,0,0,0.5);
+}
+
+/* ============================================
+   RESPONSIVE — TABLET (max 768px)
+   ============================================ */
+
+/* Lahat ng styles dito ay mag-o-override ng default styles
+   kapag ang screen ay 768px o mas maliit (tablet size). */
+@media (max-width: 768px) {
+
+  /* Nav ay magiging vertical stack na sa halip na horizontal */
+  .navbar {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .logo { font-size: 15px; }
+
+  /* Nav links ay mag-w-wrap sa maraming rows kung hindi kasya */
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .nav-links a { font-size: 8px; padding: 5px 8px; }
+
+  .ticker { font-size: 8px; }
+
+  .hero {
+    padding: 30px 16px 40px;
+    min-height: auto;
+    justify-content: center;
+  }
+
+  /* Hero content ay naka-center sa mobile */
+  .hero-content { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+  .hero-sub { font-size: 8px; text-align: center; }
+
+  /* Sign ay nag-a-adjust ng lapad para kasya sa screen */
+  .sign-board {
+    min-width: unset; /* i-cancel ang min-width: 380px mula sa desktop */
+    width: 100%;
+    max-width: 340px;
+    padding: 22px 24px 18px;
+  }
+
+  .hero-title { font-size: clamp(22px, 8vw, 36px); }
+
+  .sign-label-top  { font-size: 7px; letter-spacing: 2px; }
+  .sign-label-bottom { font-size: 7px; letter-spacing: 2px; }
+  .sign-sub        { font-size: 8px; padding: 6px 14px; }
+
+  .divider-line { width: 50px; }
+
+  .hero-desc {
+    font-size: 9px;
+    text-align: center;
+    margin: 20px 0 20px;
+  }
+
+  .hero-btn { font-size: 9px; padding: 12px 22px; }
+
+  /* Tinatanggal ang sway animation sa mobile —
+     maaaring magmukhang laggy sa mas mababang devices */
+  .sign-wrap { animation: fadeInUp 0.7s ease 0.3s both; }
+
+  .slider-wrapper { padding: 0 16px; }
+  .song { flex: 0 0 200px; height: 130px; }
+  .slider-header h3 { font-size: 11px; }
+
+  .about-speech {
+    margin: 16px;
+    padding: 20px 16px;
+    font-size: 9px;
+    line-height: 2;
+  }
+
+  .intro-box {
+    padding: 30px 20px;
+    width: 92%;
+  }
+
+  .intro-box h2 { font-size: 11px; }
+  .intro-box button { font-size: 9px; padding: 10px 16px; }
+  .intro-box input { font-size: 9px; }
+}
+
+/* ============================================
+   RESPONSIVE — MOBILE (max 480px)
+   ============================================ */
+
+@media (max-width: 480px) {
+
+  .logo { font-size: 13px; }
+  .nav-links a { font-size: 7px; padding: 4px 7px; }
+
+  .sign-board {
+    max-width: 290px;
+    padding: 18px 16px 14px;
+    /* Pinasimple ang box-shadow para hindi mabigat i-render
+       ng low-power mobile devices */
+    box-shadow:
+      0 0 0 3px rgba(0,0,0,0.9),
+      0 0 0 5px rgba(0,255,255,0.2),
+      0 0 20px rgba(0,255,255,0.2);
+  }
+
+  .hero-title { font-size: clamp(18px, 9vw, 28px); }
+
+  .sign-label-top,
+  .sign-label-bottom { font-size: 6px; letter-spacing: 1px; }
+
+  .sign-sub { font-size: 7px; padding: 5px 10px; }
+
+  .divider-line { width: 30px; }
+
+  /* Tinatago ang mga floating pixel squares sa maliliit na screen
+     dahil maaari silang lumabas sa labas ng viewport */
+  .pixel-deco { display: none; }
+
+  .song { flex: 0 0 170px; height: 110px; }
+
+  .about-speech { font-size: 8px; margin: 12px; padding: 16px 14px; }
+
+  .intro-box { padding: 24px 16px; }
+  .intro-box h2 { font-size: 10px; line-height: 1.8; }
+  /* Buttons ay nagiging vertical stack sa napakaliit na screen */
+  .btn-group { flex-direction: column; align-items: center; }
+
+  .site-footer { font-size: 8px; }
+}
+
+/* ============================================
+   RESPONSIVE — VERY SMALL (max 360px)
+   ============================================ */
+
+/* Para sa pinakamaliit na phones (ex: lumang Android models) */
+@media (max-width: 360px) {
+  .sign-board { max-width: 260px; padding: 14px 12px; }
+  .hero-title  { font-size: 18px; }
+  /* Tinatago na ang mga label sa sign — hindi na kasya sa screen */
+  .sign-label-top, .sign-label-bottom { display: none; }
+  .nav-links   { gap: 5px; }
+  .nav-links a { font-size: 6px; padding: 4px 6px; }
+}

@@ -1,0 +1,575 @@
+/* ============================================
+   CSS VARIABLES
+   Dito naka-imbak ang mga kulay at font na
+   ginagamit sa buong page. Kapag gusto mong
+   palitan ang isang kulay, dito lang baguhin —
+   awtomatiko magbabago sa lahat ng lugar.
+   ============================================ */
+:root {
+  --cyan:    #00ffff; /* pangunahing kulay — AI bubbles, borders */
+  --magenta: #ff00ff; /* pangalawang kulay — accents, user bubbles */
+  --yellow:  #ffff00; /* para sa user message bubbles */
+  --dark:    #000;    /* itim na background */
+  --font:    'Press Start 2P', cursive; /* pixel font */
+}
+
+/* Box-sizing: border-box = ang padding at border ay kasama
+   na sa lapad/taas ng elemento, hindi dadagdag pa.
+   Mas madaling mag-layout kung ganito. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   BASE LAYOUT
+   html at body ay height: 100% para
+   ma-fill ng chat section ang buong screen.
+   Ito ang pangunahing ayos ng page sa mobile.
+   ============================================ */
+html, body {
+  height: 100%;
+  /* Pinipigilan ang bounce scroll sa iOS na
+     nagdadala ng weird na background flash effect */
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--cyan);
+  background: #000; /* fallback color kapag hindi pa nag-load ang GIF */
+  /* Flex column = header ay nasa taas, chat section ay sumasakop
+     sa natitira pang espasyo pababa */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   BACKGROUND LAYER
+   Ang trick para hindi mag-flash ang GIF
+   background kapag may nag-a-animate sa page:
+
+   Ilagay ang background sa sariling div na
+   position: fixed at z-index: -2. Ito ay
+   nasa likod ng lahat ng ibang elements.
+
+   will-change: transform at transform: translateZ(0)
+   ay nagsasabi sa browser na ilagay ito sa
+   sariling GPU layer — hiwalay sa ibang
+   animations kaya hindi na sila nag-aaffect
+   sa isa't isa = walang flash.
+   ============================================ */
+.bg-layer {
+  position: fixed;   /* nakakabit sa screen, hindi gumagalaw kahit mag-scroll */
+  inset: 0;          /* shorthand para sa top:0, right:0, bottom:0, left:0 */
+  background-image: url(https://i.redd.it/v60t49y990ue1.gif);
+  background-size: cover;     /* sumasakop sa buong screen */
+  background-position: center;
+  z-index: -2;        /* nasa pinakailalim — likod ng lahat */
+  will-change: transform;    /* abiso sa browser: handa para sa animation */
+  transform: translateZ(0);  /* pinilit na gumawa ng sariling GPU layer */
+}
+
+/* Scanline overlay — gawa sa repeating-linear-gradient
+   na gumagawa ng manipis na alternating na transparent
+   at slightly opaque na linya bawat 4px.
+   Ito ang nagbibigay ng CRT monitor effect. */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,  /* manipis na itim na linya */
+    rgba(0,0,0,0.07) 4px
+  );
+  z-index: -1;          /* nasa ibabaw ng bg-layer pero nasa ilalim ng content */
+  pointer-events: none; /* hindi nito nahaharang ang mga click ng user */
+}
+
+/* ============================================
+   HEADER
+   flex-shrink: 0 = hindi mababawasan ang taas
+   ng header kahit maliit ang screen.
+   backdrop-filter: blur = frosted glass effect
+   sa background.
+   ============================================ */
+header {
+  flex-shrink: 0; /* hindi papayagan na lumiitin ang header */
+  background: rgba(0,0,0,0.85); /* semi-transparent dark background */
+  backdrop-filter: blur(8px);   /* blur ng background sa likod ng header */
+  border-bottom: 1px solid rgba(0,255,255,0.25); /* manipis na cyan border */
+  z-index: 10; /* nasa ibabaw ng background layers */
+}
+
+/* Navbar — flex layout para magkatabi ang logo at links */
+.navbar {
+  display: flex;
+  align-items: center;         /* vertically centered */
+  justify-content: space-between; /* logo sa kaliwa, links sa kanan */
+  padding: 14px 24px;
+  gap: 12px;
+}
+
+/* Logo styling */
+.logo {
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--cyan);
+  text-decoration: none; /* remove underline dahil ito ay isang link */
+  letter-spacing: 2px;
+  white-space: nowrap; /* hindi mag-wrap ng text kahit maliit ang screen */
+}
+
+/* Magenta brackets sa logo — [Navi] */
+.logo-bracket {
+  color: var(--magenta);
+  text-shadow: 0 0 6px var(--magenta); /* magenta glow effect */
+}
+
+/* Nav links — horizontal list */
+.nav-links {
+  list-style: none; /* remove default bullet points */
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;          /* kapag masikip, mag-wrap sa susunod na linya */
+  justify-content: flex-end; /* i-align sa kanan */
+}
+
+/* Individual nav link styling */
+.nav-links a {
+  font-size: 9px;
+  color: var(--cyan);
+  text-decoration: none;
+  padding: 5px 10px;
+  border: 1px solid transparent; /* transparent border para hindi gumalaw kapag nag-hover */
+  transition: all 0.2s; /* smooth na transition sa lahat ng property changes */
+}
+
+/* Hover effect sa nav links */
+.nav-links a:hover {
+  border-color: var(--cyan);
+  color: var(--magenta);
+  text-shadow: 0 0 6px var(--magenta);
+}
+
+/* ============================================
+   AI CONVERSATION SECTION
+   flex: 1 = sumasakop sa lahat ng natitira
+   pang espasyo pagkatapos ng header.
+   min-height: 0 = kritikal na fix para gumana
+   ang overflow/scroll sa loob ng flex child.
+   ============================================ */
+.ai-conversation {
+  flex: 1;      /* kunin ang lahat ng natitira pang espasyo */
+  display: flex;
+  flex-direction: column; /* titlebar → messages → suggestion → input */
+  max-width: 820px;   /* hindi lalawak ng higit sa 820px sa malalaking screen */
+  width: 100%;
+  margin: 20px auto;  /* centered horizontally, may space sa taas/baba */
+  padding: 0 16px 16px;
+  min-height: 0;      /* kritikal! kapag wala ito, hindi mag-scroll ang messages */
+}
+
+/* ============================================
+   CHAT TITLE BAR
+   Parang window ng computer — may tatlong kulay
+   na dots sa kaliwa, label sa gitna, status sa kanan.
+   ============================================ */
+.chat-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.9);
+  border: 2px solid var(--cyan);
+  border-bottom: none; /* walang border sa baba — konektado sa messages area */
+  padding: 8px 14px;
+  gap: 10px;
+  border-radius: 8px 8px 0 0; /* rounded corners sa taas lang */
+  flex-shrink: 0; /* hindi laliitin kahit maliit ang screen */
+}
+
+/* Container ng tatlong colored dots */
+.titlebar-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Base style ng bawat dot */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%; /* bilog */
+}
+/* Kulay ng bawat dot — pula, dilaw, berde (parang Mac) */
+.dot-red    { background: #ff5f57; box-shadow: 0 0 4px #ff5f57; }
+.dot-yellow { background: #febc2e; box-shadow: 0 0 4px #febc2e; }
+.dot-green  { background: #28c840; box-shadow: 0 0 4px #28c840; }
+
+/* Label sa gitna ng title bar */
+.titlebar-label {
+  font-size: 8px;
+  color: rgba(0,255,255,0.7);
+  letter-spacing: 1px;
+  flex: 1;          /* kumuha ng lahat ng espasyo sa gitna */
+  text-align: center;
+}
+
+/* Status container sa kanan */
+.titlebar-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Blinking green dot — nagpapakita na "ONLINE" ang AI */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: #28c840;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #28c840;
+  /* Paulit-ulit na mag-fade in/out para parang tumitibok */
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-text {
+  font-size: 7px;
+  color: #28c840;
+}
+
+/* Keyframe ng blinking animation ng status dot */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }   /* fully visible */
+  50%       { opacity: 0.4; } /* semi-transparent sa gitna */
+}
+
+/* ============================================
+   MESSAGES AREA
+   flex: 1 at min-height: 0 = sumasakop sa
+   natitira pang espasyo at nagpe-prevent ng
+   overflow issues sa flex containers.
+   overflow-y: auto = nagla-lagay ng scrollbar
+   kapag puno na ang messages.
+   ============================================ */
+.messages {
+  flex: 1;      /* kumuha ng lahat ng natitira pang espasyo */
+  min-height: 0; /* kritikal para gumana ang scroll sa loob ng flex */
+  overflow-y: auto; /* scroll pababa kapag puno na */
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column; /* messages ay nakahanay pababa */
+  gap: 14px; /* espasyo sa pagitan ng mga message */
+  background: rgba(0,0,0,0.8);
+  border: 2px solid var(--cyan);
+  border-top: none;    /* konektado sa titlebar */
+  border-bottom: none; /* konektado sa suggestion bar */
+  white-space: pre-line; /* ginagalang ang mga line break sa text */
+  scrollbar-width: none; /* itago ang scrollbar sa Firefox */
+}
+
+/* Itinatago ang scrollbar sa Chrome/Safari pero gumagana pa rin ang scroll */
+.messages::-webkit-scrollbar { display: none; }
+
+/* ============================================
+   MESSAGE BUBBLES
+   Dalawang klase: .message.user (kanan, yellow)
+   at .message.ai (kaliwa, cyan).
+   Ang border-radius ay nagbibigay ng chat bubble
+   shape — isang sulok ang naka-sharpen para
+   malaman kung saan nanggaling ang mensahe.
+   ============================================ */
+.message {
+  padding: 10px 16px;
+  max-width: 80%;        /* hindi lalawak ng higit sa 80% ng container */
+  word-break: break-word; /* hahati ang mahabang salita para hindi mag-overflow */
+  line-height: 1.8;
+  font-size: 9px;
+  position: relative; /* para sa ::before pseudo-element */
+  /* Pop-in animation kapag lumabas ang bagong message */
+  animation: msgPop 0.2s ease both;
+}
+
+/* Pop-in animation — slide up mula sa ibaba */
+@keyframes msgPop {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* USER bubble — naka-align sa KANAN, yellow */
+.message.user {
+  align-self: flex-end; /* itulak sa kanan */
+  background: rgba(255,255,0,0.15);
+  border: 1px solid rgba(255,255,0,0.5);
+  color: var(--yellow);
+  /* Lahat ng sulok ay rounded MALIBAN sa bottom-right
+     para malaman na sa kanan nanggaling ang bubble */
+  border-radius: 12px 12px 2px 12px;
+}
+
+/* AI bubble — naka-align sa KALIWA, cyan */
+.message.ai {
+  align-self: flex-start; /* itulak sa kaliwa */
+  background: rgba(0,255,255,0.08);
+  border: 1px solid rgba(0,255,255,0.35);
+  color: var(--cyan);
+  /* Lahat ng sulok ay rounded MALIBAN sa bottom-left
+     para malaman na sa kaliwa (AI) nanggaling ang bubble */
+  border-radius: 12px 12px 12px 2px;
+}
+
+/* Label sa taas ng bawat bubble — "YOU" o "NAVI AI"
+   Ginagamit ang ::before pseudo-element para hindi na
+   kailangan pang dagdagan ng HTML element */
+.message.user::before {
+  content: 'YOU';
+  display: block;
+  font-size: 6px;
+  color: rgba(255,255,0,0.5);
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+.message.ai::before {
+  content: 'NAVI AI';
+  display: block;
+  font-size: 6px;
+  color: rgba(0,255,255,0.5);
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+/* ============================================
+   SUGGESTION BAR
+   Nagpapakita ng rotating suggestion na
+   nagbabago every 3 seconds (hawak ng JS).
+   Clickable — kapag na-click, mapupunta ang
+   text sa input field.
+
+   border-left at border-right lang (walang
+   top/bottom) = parang extension ng messages
+   area at input area.
+   ============================================ */
+#suggestionBar {
+  font-size: 8px;
+  color: var(--cyan);
+  background: rgba(0,255,255,0.06);
+  border-left: 2px solid var(--cyan);   /* kaliwang border lang */
+  border-right: 2px solid var(--cyan);  /* kanang border lang */
+  padding: 9px 14px;
+  cursor: pointer; /* nagpapakita ng hand cursor para alam ng user na clickable */
+  opacity: 1;
+  transform: translateY(0);
+  /* Smooth na transition kapag nagbabago ang suggestion (fade + slide) */
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s;
+  user-select: none; /* hindi ma-highlight ng user ang text dito */
+  min-height: 18px;
+  flex-shrink: 0; /* hindi laliitin kahit masikip */
+  line-height: 1.8;
+}
+
+/* Hover effect sa suggestion bar */
+#suggestionBar:hover {
+  background: rgba(0,255,255,0.14);
+  color: var(--magenta);
+  border-color: var(--magenta);
+  text-shadow: 0 0 5px var(--magenta);
+}
+
+/* ============================================
+   INPUT AREA
+   Nasa pinakailalim ng chat — naglalaman ng
+   text input at send button.
+   border-radius: 0 0 8px 8px = rounded corners
+   sa ibaba lang (konektado sa suggestion bar).
+   ============================================ */
+.input-area {
+  display: flex;
+  gap: 8px;
+  background: rgba(0,0,0,0.85);
+  border: 2px solid var(--cyan);
+  border-top: 1px solid rgba(0,255,255,0.3); /* mas manipis na border sa taas */
+  border-radius: 0 0 8px 8px; /* rounded corners sa ibaba lang */
+  padding: 10px 12px;
+  flex-shrink: 0; /* hindi laliitin */
+}
+
+/* Text input field */
+.input-area input {
+  flex: 1; /* kumuha ng lahat ng available na lapad */
+  padding: 10px 14px;
+  border: 1px solid rgba(0,255,255,0.4);
+  border-radius: 4px;
+  background: rgba(0,255,255,0.05);
+  color: white;
+  font-family: var(--font);
+  font-size: 9px;
+  outline: none; /* alisin ang default browser outline kapag naka-focus */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 40px; /* minimum na taas para hindi masyadong maliit sa mobile */
+}
+
+/* Focus state ng input — nagbibigay ng cyan glow */
+.input-area input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px rgba(0,255,255,0.2);
+}
+
+/* Placeholder text styling */
+.input-area input::placeholder {
+  color: rgba(0,255,255,0.3); /* semi-transparent cyan */
+}
+
+/* Send button */
+.input-area button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cyan);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 9px;
+  transition: all 0.2s;
+  white-space: nowrap; /* hindi mag-wrap ang text */
+  flex-shrink: 0; /* hindi laliitin */
+}
+
+/* Hover at active state ng button (active = kapag pinindot sa mobile) */
+.input-area button:hover,
+.input-area button:active {
+  background: var(--cyan);
+  color: black;
+  box-shadow: 0 0 14px rgba(0,255,255,0.4);
+}
+
+/* ============================================
+   RESPONSIVE — TABLET (max-width: 768px)
+   Para sa mga tablet at malalaking phones.
+   Kino-compress ang mga spacing at font size
+   para mas magkasya sa mas maliit na screen.
+   ============================================ */
+@media (max-width: 768px) {
+  .ai-conversation {
+    margin: 12px auto;
+    padding: 0 12px 12px;
+  }
+
+  .navbar { padding: 12px 16px; }
+  .logo   { font-size: 13px; }
+  .nav-links a { font-size: 8px; padding: 4px 8px; }
+
+  .titlebar-label { font-size: 7px; }
+
+  .message { font-size: 9px; max-width: 85%; } /* mas malawak ang bubbles sa mobile */
+
+  #suggestionBar { font-size: 8px; }
+}
+
+/* ============================================
+   RESPONSIVE — MOBILE (max-width: 480px)
+   Para sa karaniwang smartphone screens.
+   ============================================ */
+@media (max-width: 480px) {
+  .ai-conversation {
+    margin: 8px auto;
+    padding: 0 8px 8px;
+  }
+
+  .navbar { padding: 10px 12px; gap: 8px; }
+  .logo   { font-size: 12px; }
+
+  .nav-links { gap: 6px; }
+  .nav-links a { font-size: 7px; padding: 4px 7px; }
+
+  /* Title bar label — i-truncate ang text kapag masyadong mahaba */
+  .titlebar-label {
+    font-size: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis; /* nagdadagdag ng "..." kapag na-cut ang text */
+    white-space: nowrap;
+  }
+
+  /* Mas maliit na dots sa title bar */
+  .dot { width: 8px; height: 8px; }
+
+  .messages { padding: 12px 10px; gap: 12px; }
+
+  .message {
+    font-size: 8px;
+    padding: 9px 12px;
+    max-width: 90%; /* mas malawak pa para may mas maraming espasyo */
+  }
+
+  /* Mas maliit na label (YOU / NAVI AI) */
+  .message::before { font-size: 5px; }
+
+  #suggestionBar {
+    font-size: 7px;
+    padding: 8px 10px;
+  }
+
+  .input-area {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .input-area input {
+    /* MINIMUM 9px ang font sa input para hindi mag-zoom ang iOS
+       kapag nag-tap ang user para mag-type */
+    font-size: 9px;
+    padding: 8px 10px;
+  }
+
+  .input-area button {
+    padding: 8px 12px;
+    font-size: 8px;
+  }
+
+  /* Sa maliit na screen, itago ang "Send" text —
+     icon lang (▶) ang makikita para may mas malaking
+     espasyo ang input field */
+  .send-text { display: none; }
+  .send-icon { font-size: 12px; }
+}
+
+/* ============================================
+   RESPONSIVE — VERY SMALL (max-width: 360px)
+   Para sa pinakamaliit na mga phone tulad ng
+   lumang Android o iPhone SE.
+   ============================================ */
+@media (max-width: 360px) {
+  .logo { font-size: 10px; }
+  .nav-links a { font-size: 6px; padding: 3px 6px; }
+  /* Itago na lang ang title bar label — masyadong maliit na ang screen */
+  .titlebar-label { display: none; }
+  .message { font-size: 7px; }
+  #suggestionBar { font-size: 6px; }
+}
+
+/* ============================================
+   iOS KEYBOARD FIX
+   Kapag nag-open ang keyboard sa iOS, nag-
+   babago ang height ng viewport. Ang
+   -webkit-fill-available ay ginagamit para
+   ma-detect ang tunay na available height.
+
+   dvh (dynamic viewport height) = bagong CSS
+   unit na awtomatikong nag-a-adjust kapag
+   nagbubukas/nagsasara ang keyboard sa mobile.
+   ============================================ */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    height: -webkit-fill-available;
+  }
+
+  .ai-conversation {
+    max-height: calc(100dvh - 80px); /* 80px = approximate height ng header */
+  }
+}
